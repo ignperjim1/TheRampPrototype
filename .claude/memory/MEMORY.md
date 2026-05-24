@@ -1,0 +1,4 @@
+- [Proyecto: prototipo The Ramp para selección](project_theramp_prototype.md) — sprint de 2 semanas, foco UX/game feel/juicy
+- [Usuario: developer en proceso de selección](user_profile.md) — habla en español, busca trabajo, valora colaboración real
+- [Brief técnico del prototipo](project_brief_tecnico.md) — Unity 2022.3.62f2, Kenney mini-skate, sin Asset Store/plugins
+- [Memoria vive en el proyecto, no en el perfil](feedback_memoria_en_proyecto.md) — trabaja en varios equipos durante el sprint

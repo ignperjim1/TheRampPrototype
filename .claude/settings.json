@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rm \"C:/Users/Nacho/.claude/projects/c--Unity-TheRampPrototype/memory/MEMORY.md\")"
+    ]
+  }
+}
