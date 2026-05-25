@@ -14,11 +14,13 @@ metadata:
 
 **Ubicación del proyecto:** `C:\Viva Games\TheRampPrototype\` (NO `c:\Unity\TheRampPrototype\` — ese fue un primer intento con Built-in que se descartó).
 
-**Estado actual del proyecto:**
-- Proyecto creado desde el template oficial **3D (URP) Core** de Unity Hub → URP ya viene configurado (URPAsset asignado en Graphics y Quality, materiales del sample en URP/Lit).
-- Pack Kenney **mini-skate** ya importado en `Assets/ThirdParty/Kenney/` por el usuario.
-- Cinemachine: **pendiente añadir** (package oficial de Unity, decisión tomada de usarlo).
+**Estado actual del proyecto (2026-05-25):**
+- Proyecto creado desde el template oficial **3D (URP) Core** de Unity Hub → URP 14.0.12 configurado.
+- Pack Kenney **mini-skate** importado en `Assets/ThirdParty/kenney_mini-skate/`.
+- Cinemachine **2.9.7 ya instalado** en `Packages/manifest.json`.
 - Input: **legacy** (`Input.GetMouseButton` + delta manual), decisión tomada.
-- Resto de estructura `_Project/` (Art, Audio, Prefabs, Scenes, Scripts, Settings, VFX) → pendiente de crear.
+- Estructura `_Project/` **ya creada** con todas las subcarpetas del plan (Art/{Materials,VFX}, Audio/{Music,SFX}, Prefabs/{Skater,Level,UI}, Scenes, Scripts/{Audio,Camera,Feedback,Game,Skater,Tricks,UI}, Settings).
+- `Assets/_Project/Scenes/Main.unity` existe (contenido sin verificar aún).
+- `Assets/_Project/Scripts/` vacía de `.cs` — el código del Día 2+ está por escribir.
 
 **How to apply:** Antes de añadir packages, materiales nuevos o cambiar render pipeline, confirmar con el usuario; afecta a la estructura del proyecto y al setup del repo.
