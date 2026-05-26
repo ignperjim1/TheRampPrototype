@@ -4,3 +4,5 @@
 - [Memoria vive en el proyecto, no en el perfil](feedback_memoria_en_proyecto.md) — trabaja en varios equipos durante el sprint
 - [Physic Material para deslizar en rampas Kenney](project_physic_materials.md) — Skate_Physics con fricción 0.05 + Combine Minimum
 - [Movimiento del skate como péndulo físico](project_movement_design.md) — Rigidbody natural + SpeedMaintainer + tricks como rotación del modelo hijo
+- [Cámara fija + CameraFeedback (sin Cinemachine)](project_camera_feedback.md) — shake + dolly-zoom hacia el skate al iniciar trick, valores validados
+- [Arquitectura de eventos del trick](project_trick_events.md) — Started/Completed/Failed/CleanLanding, quién escucha qué, chain buffer
