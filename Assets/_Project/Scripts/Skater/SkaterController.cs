@@ -3,87 +3,54 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody))]
 public class SkaterController : MonoBehaviour
 {
-    [Header("Movement")]
-    [SerializeField] private float speed = 5f;
-    [SerializeField] private float jumpForce = 7f;
+    [Header("Initial Impulse")]
+    [SerializeField] private float initialVelocity = 6f;
 
     [Header("Ground Detection")]
     [SerializeField] private LayerMask groundLayers = ~0;
     [SerializeField] private float groundCheckDistance = 0.2f;
     [SerializeField] private float groundCheckOriginOffset = 0.1f;
-    [SerializeField] private float postJumpGroundLockTime = 0.15f;
+    [SerializeField] private float wheelOffset = 0.3f;
+    [SerializeField] private float coyoteTime = 0.1f;
 
     public enum State { Rolling, Airborne }
     public State CurrentState { get; private set; } = State.Rolling;
 
     private Rigidbody rb;
     private Collider col;
-    private float direction = 1f;
-    private float groundLockUntil = 0f;
-
-    private const RigidbodyConstraints GroundConstraints =
-        RigidbodyConstraints.FreezeRotationY | RigidbodyConstraints.FreezePositionX;
-
-    private const RigidbodyConstraints AirConstraints =
-        RigidbodyConstraints.FreezeRotation | RigidbodyConstraints.FreezePositionX;
+    private float lastGroundedTime;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
         col = GetComponent<Collider>();
-        rb.constraints = GroundConstraints;
+        //rb.constraints = RigidbodyConstraints.FreezeRotation | RigidbodyConstraints.FreezePositionX;
+    }
+
+    private void Start()
+    {
+        rb.velocity = new Vector3(0f, 0f, initialVelocity);
     }
 
     private void FixedUpdate()
     {
-        State newState = IsGrounded() ? State.Rolling : State.Airborne;
+        bool grounded = IsGrounded();
+        if (grounded) lastGroundedTime = Time.time;
 
-        if (newState == State.Rolling)
-        {
-            Vector3 v = rb.velocity;
-            v.z = direction * speed;
-            rb.velocity = v;
-        }
-
-        if (newState == State.Rolling && CurrentState == State.Airborne)
-        {
-            OnLanded();
-        }
-        CurrentState = newState;
-    }
-
-    public void Jump()
-    {
-        rb.constraints = AirConstraints;
-        rb.angularVelocity = Vector3.zero;
-        transform.rotation = Quaternion.Euler(0f, transform.rotation.eulerAngles.y, 0f);
-
-        Vector3 v = rb.velocity;
-        v.y = jumpForce;
-        v.z = 0f;
-        rb.velocity = v;
-
-        CurrentState = State.Airborne;
-        groundLockUntil = Time.time + postJumpGroundLockTime;
-    }
-
-    private void OnLanded()
-    {
-        Debug.Log("onlanded");
-        rb.constraints = GroundConstraints;
-        FlipDirection();
-    }
-
-    public void FlipDirection()
-    {
-        direction *= -1f;
+        bool withinCoyote = Time.time - lastGroundedTime <= coyoteTime;
+        CurrentState = (grounded || withinCoyote) ? State.Rolling : State.Airborne;
     }
 
     private bool IsGrounded()
     {
-        if (Time.time < groundLockUntil) return false;
+        return WheelGrounded(transform.forward) || WheelGrounded(-transform.forward);
+    }
 
-        Vector3 origin = col.bounds.center + Vector3.down * (col.bounds.extents.y - groundCheckOriginOffset);
+    private bool WheelGrounded(Vector3 forwardOffset)
+    {
+        Vector3 origin = col.bounds.center
+            + forwardOffset * wheelOffset
+            + Vector3.down * (col.bounds.extents.y - groundCheckOriginOffset);
         return Physics.Raycast(origin, Vector3.down, groundCheckDistance, groundLayers, QueryTriggerInteraction.Ignore);
     }
 
@@ -91,8 +58,17 @@ public class SkaterController : MonoBehaviour
     {
         if (col == null) col = GetComponent<Collider>();
         if (col == null) return;
-        Vector3 origin = col.bounds.center + Vector3.down * (col.bounds.extents.y - groundCheckOriginOffset);
+
         Gizmos.color = Color.green;
+        DrawWheelGizmo(transform.forward);
+        DrawWheelGizmo(-transform.forward);
+    }
+
+    private void DrawWheelGizmo(Vector3 forwardOffset)
+    {
+        Vector3 origin = col.bounds.center
+            + forwardOffset * wheelOffset
+            + Vector3.down * (col.bounds.extents.y - groundCheckOriginOffset);
         Gizmos.DrawLine(origin, origin + Vector3.down * groundCheckDistance);
     }
 }

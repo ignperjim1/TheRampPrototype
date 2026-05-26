@@ -3,3 +3,4 @@
 - [Brief técnico del prototipo](project_brief_tecnico.md) — Unity 2022.3.62f2, Kenney mini-skate, sin Asset Store/plugins
 - [Memoria vive en el proyecto, no en el perfil](feedback_memoria_en_proyecto.md) — trabaja en varios equipos durante el sprint
 - [Physic Material para deslizar en rampas Kenney](project_physic_materials.md) — Skate_Physics con fricción 0.05 + Combine Minimum
+- [Movimiento del skate como péndulo físico](project_movement_design.md) — Rigidbody natural + SpeedMaintainer + tricks como rotación del modelo hijo
