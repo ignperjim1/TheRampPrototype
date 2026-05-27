@@ -6,3 +6,4 @@
 - [Movimiento del skate como péndulo físico](project_movement_design.md) — Rigidbody natural + SpeedMaintainer + tricks como rotación del modelo hijo
 - [Cámara fija + CameraFeedback (sin Cinemachine)](project_camera_feedback.md) — shake + dolly-zoom hacia el skate al iniciar trick, valores validados
 - [Arquitectura de eventos del trick](project_trick_events.md) — Started/Completed/Failed/CleanLanding, quién escucha qué, chain buffer
+- [Audio procedural sin assets externos](project_audio_procedural.md) — decisión + tabla de SFX a implementar con AudioClip.Create

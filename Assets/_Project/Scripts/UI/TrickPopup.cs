@@ -36,7 +36,7 @@ public class TrickPopup : MonoBehaviour
 
     public void Show(string trickName, int score)
     {
-        if (label != null) label.text = $"{trickName.ToUpper()}  <size=70%>+{score}";
+        if (label != null) label.text = $"{trickName.ToUpper()}\n<size=70%>+{score}";
         if (label != null) label.color = Color.white;
         canvasGroup.alpha = 1f;
         rect.anchoredPosition = baseAnchoredPos;

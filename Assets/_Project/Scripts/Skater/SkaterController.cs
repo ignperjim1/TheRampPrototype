@@ -16,12 +16,16 @@ public class SkaterController : MonoBehaviour
 
     [Header("Fail / Respawn")]
     [SerializeField] private TrickPerformer trickPerformer;
+    [SerializeField] private SpeedMaintainer speedMaintainer;
     [SerializeField] private Transform skateModel;
     [SerializeField] private float respawnDelay = 2f;
     [SerializeField] private float ragdollSpinTorque = 5f;
+    [SerializeField] private float ragdollLaunchUpward = 5f;
+    [SerializeField] private float ragdollLaunchRandom = 3f;
 
     public enum State { Rolling, Airborne }
     public State CurrentState { get; private set; } = State.Rolling;
+    public bool IsRespawning => isRespawning;
 
     private Rigidbody rb;
     private Collider col;
@@ -38,6 +42,7 @@ public class SkaterController : MonoBehaviour
         spawnPosition = transform.position;
         spawnRotation = transform.rotation;
         initialConstraints = rb.constraints;
+        lastGroundedTime = float.NegativeInfinity;
     }
 
     private void OnEnable()
@@ -65,8 +70,15 @@ public class SkaterController : MonoBehaviour
     {
         isRespawning = true;
         if (trickPerformer != null) trickPerformer.enabled = false;
+        if (speedMaintainer != null) speedMaintainer.enabled = false;
 
         rb.constraints = RigidbodyConstraints.None;
+        yield return null;
+
+        Vector3 randomDir = Random.insideUnitSphere;
+        randomDir.y = Mathf.Abs(randomDir.y);
+        Vector3 launch = Vector3.up * ragdollLaunchUpward + randomDir * ragdollLaunchRandom;
+        rb.AddForce(launch, ForceMode.Impulse);
         rb.AddTorque(Random.insideUnitSphere * ragdollSpinTorque, ForceMode.Impulse);
 
         yield return new WaitForSeconds(respawnDelay);
@@ -80,6 +92,7 @@ public class SkaterController : MonoBehaviour
         rb.velocity = new Vector3(0f, 0f, initialVelocity);
 
         if (trickPerformer != null) trickPerformer.enabled = true;
+        if (speedMaintainer != null) speedMaintainer.enabled = true;
         isRespawning = false;
     }
 

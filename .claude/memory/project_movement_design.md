@@ -10,6 +10,7 @@ El skate se comporta como un **péndulo físico** entre las dos rampas, no como 
 **Diseño actual (validado en sesión 2026-05-25):**
 - Rigidbody con gravedad estándar, `FreezeRotation` + `FreezePositionX` siempre activos. Sin cambios dinámicos de constraints.
 - Velocidad inicial única (`initialVelocity`) en `Start()`. No se vuelve a forzar velocity en código (excepto el SpeedMaintainer).
+- `lastGroundedTime` se inicializa a `float.NegativeInfinity` en `Awake` para evitar que el coyote time (0.1s) reporte Rolling falsamente durante el spawn — el skate aparece en aire encima de la rampa, y sin esto el primer FixedUpdate hace `Time.time - 0 <= 0.1` (TRUE), marcando Rolling antes de haber tocado suelo.
 - Las rampas, suelo y el `Skate_Physics` (fricción 0) hacen el resto: el skate oscila naturalmente subiendo, parándose, bajando, cruzando el suelo, subiendo la otra rampa.
 - **`SpeedMaintainer`**: trigger collider en el centro del suelo que restaura `velocity.z` a un target fijo manteniendo el signo. Compensa la pérdida de energía por las facetas del Mesh Collider de las rampas. Sin él, el péndulo decae.
 - **Colliders extendidos en lo alto de las rampas**: paredes invisibles que prolongan artificialmente la superficie por la que el skate desliza, para que visualmente "despegue" pero físicamente siga la guía. Garantiza que la trayectoria del salto sea predecible.
