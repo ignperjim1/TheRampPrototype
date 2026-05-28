@@ -19,7 +19,12 @@ public class TrickPerformer : MonoBehaviour
 
     [Header("Input Buffer")]
     [SerializeField] private float swipeBufferDuration = 0.3f;
-    [SerializeField] private float chainBufferDuration = 0.1f;
+
+    [Header("Chaining")]
+    [SerializeField, Range(0.3f, 1f)] private float chainAfter = 0.7f;
+
+    [Header("Rotation")]
+    [SerializeField] private AnimationCurve rotationEase = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
 
     [Header("Air Window (manual)")]
     [SerializeField] private float windowStart = 0f;
@@ -30,6 +35,7 @@ public class TrickPerformer : MonoBehaviour
     private SwipeDirection? bufferedSwipe;
     private float bufferedAt;
     private bool hasPendingCleanLanding;
+    private Quaternion comboBase = Quaternion.identity;
 
     private void OnEnable()
     {
@@ -47,7 +53,11 @@ public class TrickPerformer : MonoBehaviour
 
         if (airborne)
         {
-            if (airborneSince < 0f) airborneSince = Time.time;
+            if (airborneSince < 0f)
+            {
+                airborneSince = Time.time;
+                comboBase = skateModel.localRotation;
+            }
         }
         else
         {
@@ -118,14 +128,15 @@ public class TrickPerformer : MonoBehaviour
         OnTrickStarted?.Invoke(trick);
 
         Quaternion start = skateModel.localRotation;
-        Vector3 axis = trick.rotationAxis.sqrMagnitude > 0.001f ? trick.rotationAxis.normalized : Vector3.forward;
+        Vector3 deg = trick.rotationDegrees;
 
         float t = 0f;
+        bool chaining = false;
         while (t < trick.duration)
         {
             if (skater.CurrentState != SkaterController.State.Airborne)
             {
-                skateModel.localRotation = start;
+                skateModel.localRotation = comboBase;
                 isPerforming = false;
                 OnTrickFailed?.Invoke(trick);
                 yield break;
@@ -133,28 +144,45 @@ public class TrickPerformer : MonoBehaviour
 
             t += Time.deltaTime;
             float k = Mathf.Clamp01(t / trick.duration);
-            float angle = k * trick.rotationDegrees;
-            skateModel.localRotation = start * Quaternion.AngleAxis(angle, axis);
+            float e = rotationEase.Evaluate(k);
+            skateModel.localRotation = start
+                * Quaternion.AngleAxis(e * deg.z, Vector3.forward)
+                * Quaternion.AngleAxis(e * deg.x, Vector3.right)
+                * Quaternion.AngleAxis(e * deg.y, Vector3.up);
+
+            // Chain window: once past chainAfter, a buffered swipe starts the next
+            // trick early. The board keeps its current rotation so the combo flows
+            // continuously instead of snapping back to flat between tricks.
+            if (k >= chainAfter && HasChainableBuffer())
+            {
+                chaining = true;
+                break;
+            }
+
             yield return null;
         }
 
-        skateModel.localRotation = start;
         isPerforming = false;
-        hasPendingCleanLanding = true;
         OnTrickCompleted?.Invoke(trick);
 
-        TryChainFromBuffer();
+        if (chaining)
+        {
+            SwipeDirection dir = bufferedSwipe.Value;
+            bufferedSwipe = null;
+            TryPerform(dir);
+        }
+        else
+        {
+            skateModel.localRotation = comboBase;
+            hasPendingCleanLanding = true;
+        }
     }
 
-    private void TryChainFromBuffer()
+    private bool HasChainableBuffer()
     {
-        if (!bufferedSwipe.HasValue) return;
-        if (Time.time - bufferedAt > chainBufferDuration) return;
-        if (skater.CurrentState != SkaterController.State.Airborne) return;
-        if (!IsInAirWindow()) return;
-
-        SwipeDirection dir = bufferedSwipe.Value;
-        bufferedSwipe = null;
-        TryPerform(dir);
+        if (!bufferedSwipe.HasValue) return false;
+        if (Time.time - bufferedAt > swipeBufferDuration) return false;
+        if (!IsInAirWindow()) return false;
+        return ResolveTrick(bufferedSwipe.Value) != null;
     }
 }

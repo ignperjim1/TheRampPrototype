@@ -12,9 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1f325d11030e84ede83ff986febf762c, type: 3}
   m_Name: RightTrick
   m_EditorClassIdentifier: 
-  trickName: Heelflip
+  trickName: Tre Flip
   swipeDirection: 3
-  rotationAxis: {x: 0, y: 1, z: 0}
-  rotationDegrees: 360
-  duration: 0.5
-  score: 120
+  rotationDegrees: {x: 0, y: 360, z: 360}
+  duration: 0.8
+  score: 220
