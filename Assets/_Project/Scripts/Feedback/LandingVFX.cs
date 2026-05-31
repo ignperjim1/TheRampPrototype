@@ -10,14 +10,14 @@ public class LandingVFX : MonoBehaviour
     [SerializeField] private ParticleSystem[] landingBursts;
 
     [Header("Post-Landing Trail")]
-    [SerializeField] private TrailRenderer landingTrail;
+    [SerializeField] private TrailRenderer[] landingTrails;
     [SerializeField] private float trailDuration = 1f;
 
     private Coroutine trailRoutine;
 
     private void Awake()
     {
-        if (landingTrail != null) landingTrail.emitting = false;
+        SetTrailsEmitting(false);
     }
 
     private void OnEnable()
@@ -37,7 +37,7 @@ public class LandingVFX : MonoBehaviour
             if (landingBursts[i] != null) landingBursts[i].Play();
         }
 
-        if (landingTrail != null)
+        if (landingTrails != null && landingTrails.Length > 0)
         {
             if (trailRoutine != null) StopCoroutine(trailRoutine);
             trailRoutine = StartCoroutine(TrailRoutine());
@@ -46,9 +46,18 @@ public class LandingVFX : MonoBehaviour
 
     private IEnumerator TrailRoutine()
     {
-        landingTrail.emitting = true;
+        SetTrailsEmitting(true);
         yield return new WaitForSeconds(trailDuration);
-        landingTrail.emitting = false;
+        SetTrailsEmitting(false);
         trailRoutine = null;
+    }
+
+    private void SetTrailsEmitting(bool emitting)
+    {
+        if (landingTrails == null) return;
+        for (int i = 0; i < landingTrails.Length; i++)
+        {
+            if (landingTrails[i] != null) landingTrails[i].emitting = emitting;
+        }
     }
 }

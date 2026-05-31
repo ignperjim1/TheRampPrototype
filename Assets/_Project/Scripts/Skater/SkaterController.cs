@@ -16,15 +16,19 @@ public class SkaterController : MonoBehaviour
 
     [Header("Fail / Respawn")]
     [SerializeField] private TrickPerformer trickPerformer;
-    [SerializeField] private SpeedMaintainer speedMaintainer;
     [SerializeField] private Transform skateModel;
     [SerializeField] private float respawnDelay = 2f;
     [SerializeField] private float ragdollSpinTorque = 5f;
+    [Tooltip("Impulso vertical fijo aplicado al ragdoll al fallar un trick (Vector3.up * este valor). Garantiza que el skate vuele hacia arriba.")]
     [SerializeField] private float ragdollLaunchUpward = 5f;
+    [Tooltip("Magnitud del impulso adicional en dirección aleatoria (Random.insideUnitSphere con Y forzada positiva). Suma variedad al ragdoll por encima del componente vertical fijo.")]
     [SerializeField] private float ragdollLaunchRandom = 3f;
 
     public enum State { Rolling, Airborne }
-    public State CurrentState { get; private set; } = State.Rolling;
+    // Default Airborne (not Rolling) so consumers reading CurrentState during
+    // the first Update — before FixedUpdate has run a ground check — don't
+    // mistake the spawn frame for "on the ground" and arm trick-related state.
+    public State CurrentState { get; private set; } = State.Airborne;
     public bool IsRespawning => isRespawning;
 
     private Rigidbody rb;
@@ -34,6 +38,7 @@ public class SkaterController : MonoBehaviour
     private Quaternion spawnRotation;
     private RigidbodyConstraints initialConstraints;
     private bool isRespawning;
+    private SpeedMaintainer speedMaintainer;
 
     private void Awake()
     {
@@ -60,6 +65,11 @@ public class SkaterController : MonoBehaviour
         rb.velocity = new Vector3(0f, 0f, initialVelocity);
     }
 
+    // Injected by SkaterSpawner after instantiating the prefab — the
+    // SpeedMaintainer lives in the scene, so a prefab can't serialize a
+    // direct reference to it.
+    public void SetSpeedMaintainer(SpeedMaintainer sm) => speedMaintainer = sm;
+
     private void HandleTrickFailed(TrickDefinition trick)
     {
         if (isRespawning) return;
@@ -70,6 +80,9 @@ public class SkaterController : MonoBehaviour
     {
         isRespawning = true;
         if (trickPerformer != null) trickPerformer.enabled = false;
+        // Disable SpeedMaintainer too: otherwise its OnTriggerEnter resets
+        // velocity.z on the floor and yanks the ragdolling skate back into
+        // the pendulum path mid-flight.
         if (speedMaintainer != null) speedMaintainer.enabled = false;
 
         rb.constraints = RigidbodyConstraints.None;

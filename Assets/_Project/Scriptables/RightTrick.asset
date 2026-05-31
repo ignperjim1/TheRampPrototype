@@ -15,5 +15,5 @@ MonoBehaviour:
   trickName: Tre Flip
   swipeDirection: 3
   rotationDegrees: {x: 0, y: 360, z: 360}
-  duration: 0.8
+  duration: 0.5
   score: 220

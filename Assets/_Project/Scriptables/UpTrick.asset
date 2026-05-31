@@ -15,5 +15,5 @@ MonoBehaviour:
   trickName: Impossible
   swipeDirection: 0
   rotationDegrees: {x: 360, y: 0, z: 0}
-  duration: 0.7
+  duration: 0.6
   score: 150

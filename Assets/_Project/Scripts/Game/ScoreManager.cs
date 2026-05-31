@@ -3,10 +3,19 @@ using UnityEngine;
 
 public class ScoreManager : MonoBehaviour
 {
-    [SerializeField] private TrickPerformer trickPerformer;
-
     public int Score { get; private set; }
+    public int HighScore { get; private set; }
     public event Action<int, int> OnScoreChanged;
+    public event Action<int> OnHighScoreChanged;
+
+    private const string HighScoreKey = "TheRamp.HighScore";
+
+    private TrickPerformer trickPerformer;
+
+    private void Awake()
+    {
+        HighScore = PlayerPrefs.GetInt(HighScoreKey, 0);
+    }
 
     private void OnEnable()
     {
@@ -26,10 +35,24 @@ public class ScoreManager : MonoBehaviour
         }
     }
 
+    public void SetTrickPerformer(TrickPerformer tp)
+    {
+        enabled = false;
+        trickPerformer = tp;
+        enabled = true;
+    }
+
     private void HandleCompleted(TrickDefinition trick)
     {
         Score += trick.score;
         OnScoreChanged?.Invoke(Score, trick.score);
+        if (Score > HighScore)
+        {
+            HighScore = Score;
+            PlayerPrefs.SetInt(HighScoreKey, HighScore);
+            PlayerPrefs.Save();
+            OnHighScoreChanged?.Invoke(HighScore);
+        }
     }
 
     private void HandleFailed(TrickDefinition trick)

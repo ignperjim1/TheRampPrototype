@@ -5,9 +5,9 @@ using UnityEngine;
 public class HUD : MonoBehaviour
 {
     [Header("References")]
-    [SerializeField] private TrickPerformer trickPerformer;
     [SerializeField] private ScoreManager scoreManager;
     [SerializeField] private TextMeshProUGUI scoreLabel;
+    [SerializeField] private TextMeshProUGUI bestScoreLabel;
     [SerializeField] private TrickPopup popupPrefab;
     [SerializeField] private RectTransform popupParent;
 
@@ -18,6 +18,7 @@ public class HUD : MonoBehaviour
     private TrickPopup activePopup;
     private Coroutine scorePopRoutine;
     private Vector3 scoreBaseScale;
+    private TrickPerformer trickPerformer;
 
     private void Awake()
     {
@@ -30,6 +31,10 @@ public class HUD : MonoBehaviour
         {
             scoreLabel.text = scoreManager.Score.ToString();
         }
+        if (bestScoreLabel != null && scoreManager != null)
+        {
+            bestScoreLabel.text = $"BEST: {scoreManager.HighScore}";
+        }
     }
 
     private void OnEnable()
@@ -40,7 +45,11 @@ public class HUD : MonoBehaviour
             trickPerformer.OnTrickCompleted += HandleTrickCompleted;
             trickPerformer.OnTrickFailed += HandleTrickFailed;
         }
-        if (scoreManager != null) scoreManager.OnScoreChanged += HandleScoreChanged;
+        if (scoreManager != null)
+        {
+            scoreManager.OnScoreChanged += HandleScoreChanged;
+            scoreManager.OnHighScoreChanged += HandleHighScoreChanged;
+        }
     }
 
     private void OnDisable()
@@ -51,7 +60,23 @@ public class HUD : MonoBehaviour
             trickPerformer.OnTrickCompleted -= HandleTrickCompleted;
             trickPerformer.OnTrickFailed -= HandleTrickFailed;
         }
-        if (scoreManager != null) scoreManager.OnScoreChanged -= HandleScoreChanged;
+        if (scoreManager != null)
+        {
+            scoreManager.OnScoreChanged -= HandleScoreChanged;
+            scoreManager.OnHighScoreChanged -= HandleHighScoreChanged;
+        }
+    }
+
+    public void SetTrickPerformer(TrickPerformer tp)
+    {
+        enabled = false;
+        trickPerformer = tp;
+        enabled = true;
+    }
+
+    private void HandleHighScoreChanged(int newHigh)
+    {
+        if (bestScoreLabel != null) bestScoreLabel.text = $"BEST: {newHigh}";
     }
 
     private void HandleTrickStarted(TrickDefinition trick)

@@ -1,8 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(ffmpeg -version)",
-      "Bash(grep -m1 guid: __TRACKED_VAR__.asset.meta)"
-    ]
-  }
-}

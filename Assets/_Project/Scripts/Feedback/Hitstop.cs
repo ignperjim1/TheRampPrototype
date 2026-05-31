@@ -8,6 +8,7 @@ public class Hitstop : MonoBehaviour
 
     [Header("Hitstop on Clean Landing")]
     [SerializeField] private float duration = 0.08f;
+    [Tooltip("Valor al que se setea Time.timeScale durante el hitstop. 0 = freeze total (más impacto), 1 = sin efecto. Counter-intuitive: cuanto MÁS BAJO, más fuerte se siente el hit.")]
     [SerializeField, Range(0f, 1f)] private float freezeScale = 0f;
 
     private Coroutine routine;
@@ -25,6 +26,16 @@ public class Hitstop : MonoBehaviour
             Time.timeScale = 1f;
             routine = null;
         }
+    }
+
+    // Called by SkaterSpawner after instantiating the skater prefab.
+    // enabled=false/true cycles OnDisable/OnEnable so subscriptions reset
+    // cleanly against the new reference.
+    public void SetTrickPerformer(TrickPerformer tp)
+    {
+        enabled = false;
+        trickPerformer = tp;
+        enabled = true;
     }
 
     private void HandleCleanLanding() => Play();

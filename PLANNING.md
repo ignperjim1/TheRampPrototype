@@ -1,5 +1,6 @@
 # The Ramp — Prototipo (planning)
 
+Plan inicial del sprint, redactado el día 1. Se conserva como referencia de planificación; algunos puntos divergen de lo finalmente entregado (estructura de carpetas exacta, número de trucos, alcance del juicy). El desglose real está en el README principal.
 Referencia del sprint: estructura de carpetas, decisiones y calendario.
 
 ---

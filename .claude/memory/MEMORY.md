@@ -1,9 +1,0 @@
-- [Proyecto: prototipo The Ramp para selección](project_theramp_prototype.md) — sprint de 2 semanas, foco UX/game feel/juicy
-- [Usuario: developer en proceso de selección](user_profile.md) — habla en español, busca trabajo, valora colaboración real
-- [Brief técnico del prototipo](project_brief_tecnico.md) — Unity 2022.3.62f2, Kenney mini-skate, sin Asset Store/plugins
-- [Memoria vive en el proyecto, no en el perfil](feedback_memoria_en_proyecto.md) — trabaja en varios equipos durante el sprint
-- [Physic Material para deslizar en rampas Kenney](project_physic_materials.md) — Skate_Physics con fricción 0.05 + Combine Minimum
-- [Movimiento del skate como péndulo físico](project_movement_design.md) — Rigidbody natural + SpeedMaintainer + tricks como rotación del modelo hijo
-- [Cámara fija + CameraFeedback (sin Cinemachine)](project_camera_feedback.md) — shake + dolly-zoom hacia el skate al iniciar trick, valores validados
-- [Arquitectura de eventos del trick](project_trick_events.md) — Started/Completed/Failed/CleanLanding, quién escucha qué, chain buffer
-- [Audio procedural sin assets externos](project_audio_procedural.md) — decisión + tabla de SFX a implementar con AudioClip.Create

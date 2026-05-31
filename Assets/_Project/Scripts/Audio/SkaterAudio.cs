@@ -3,11 +3,11 @@ using UnityEngine;
 public class SkaterAudio : MonoBehaviour
 {
     [Header("References")]
-    [SerializeField] private SkaterController skater;
-    [SerializeField] private TrickPerformer trickPerformer;
+    [SerializeField] private ScoreManager scoreManager;
 
     [Header("Mix")]
     [SerializeField, Range(0f, 1f)] private float masterVolume = 1f;
+    [Tooltip("Variación aleatoria de pitch aplicada a cada one-shot (±este valor). Pequeñas cantidades (0.05-0.1) evitan que los SFX repetidos suenen idénticos. Rango limitado a 0.3 porque más arriba ya distorsiona la identidad del sonido sintetizado.")]
     [SerializeField, Range(0f, 0.3f)] private float pitchVariance = 0.06f;
     [SerializeField] private int oneShotVoices = 6;
 
@@ -21,37 +21,46 @@ public class SkaterAudio : MonoBehaviour
     [SerializeField, Range(0f, 1f)] private float landVolume = 0.8f;
     [SerializeField, Range(0f, 1f)] private float successVolume = 1f;
     [SerializeField, Range(0f, 1f)] private float failVolume = 1f;
+    [SerializeField, Range(0f, 1f)] private float scoreVolume = 0.4f;
 
     private AudioClip jumpClip;
     private AudioClip trickClip;
     private AudioClip landClip;
     private AudioClip successClip;
     private AudioClip failClip;
+    private AudioClip scoreClip;
 
     private AudioSource rollingSource;
+    // Dedicated source for the jump swoosh (instead of the round-robin pool)
+    // so HandleTrickStarted can Stop() it cleanly when a trick begins right
+    // after takeoff — the trick swoosh overrides the jump in seconds.
+    private AudioSource jumpSource;
     private AudioSource[] voices;
     private int nextVoice;
 
     private SkaterController.State lastState;
     private bool hasTouchedGround;
     private bool wasRespawning;
+    private SkaterController skater;
+    private TrickPerformer trickPerformer;
+
 
     private void Awake()
     {
-        if (skater == null) skater = GetComponent<SkaterController>() ?? FindObjectOfType<SkaterController>();
-        if (trickPerformer == null) trickPerformer = GetComponent<TrickPerformer>() ?? FindObjectOfType<TrickPerformer>();
-
         jumpClip = SfxSynth.JumpSwoosh();
         trickClip = SfxSynth.TrickSwoosh();
         landClip = SfxSynth.LandImpact();
         successClip = SfxSynth.SuccessJingle();
         failClip = SfxSynth.FailThud();
+        scoreClip = SfxSynth.ScoreClick();
 
         rollingSource = CreateSource();
         rollingSource.clip = SfxSynth.RollingLoop();
         rollingSource.loop = true;
         rollingSource.volume = 0f;
         rollingSource.Play();
+
+        jumpSource = CreateSource();
 
         voices = new AudioSource[Mathf.Max(1, oneShotVoices)];
         for (int i = 0; i < voices.Length; i++) voices[i] = CreateSource();
@@ -67,6 +76,7 @@ public class SkaterAudio : MonoBehaviour
             trickPerformer.OnCleanLanding += HandleCleanLanding;
             trickPerformer.OnTrickFailed += HandleTrickFailed;
         }
+        if (scoreManager != null) scoreManager.OnScoreChanged += HandleScoreChanged;
     }
 
     private void OnDisable()
@@ -77,6 +87,25 @@ public class SkaterAudio : MonoBehaviour
             trickPerformer.OnCleanLanding -= HandleCleanLanding;
             trickPerformer.OnTrickFailed -= HandleTrickFailed;
         }
+        if (scoreManager != null) scoreManager.OnScoreChanged -= HandleScoreChanged;
+    }
+
+    public void SetSkater(SkaterController s)
+    {
+        skater = s;
+        if (skater != null) lastState = skater.CurrentState;
+    }
+
+    public void SetTrickPerformer(TrickPerformer tp)
+    {
+        enabled = false;
+        trickPerformer = tp;
+        enabled = true;
+    }
+
+    private void HandleScoreChanged(int newScore, int delta)
+    {
+        if (delta > 0) PlayOneShot(scoreClip, scoreVolume);
     }
 
     private void Update()
@@ -103,7 +132,10 @@ public class SkaterAudio : MonoBehaviour
             if (hasTouchedGround)
             {
                 if (lastState == SkaterController.State.Rolling)
-                    PlayOneShot(jumpClip, jumpVolume);
+                {
+                    jumpSource.pitch = 1f + Random.Range(-pitchVariance, pitchVariance);
+                    jumpSource.PlayOneShot(jumpClip, Mathf.Clamp01(jumpVolume) * masterVolume);
+                }
                 else
                     PlayOneShot(landClip, landVolume);
             }
@@ -121,7 +153,11 @@ public class SkaterAudio : MonoBehaviour
             rollingFadeSpeed * Time.unscaledDeltaTime);
     }
 
-    private void HandleTrickStarted(TrickDefinition trick) => PlayOneShot(trickClip, trickVolume);
+    private void HandleTrickStarted(TrickDefinition trick)
+    {
+        jumpSource.Stop();
+        PlayOneShot(trickClip, trickVolume);
+    }
     private void HandleCleanLanding() => PlayOneShot(successClip, successVolume);
 
     private void HandleTrickFailed(TrickDefinition trick)

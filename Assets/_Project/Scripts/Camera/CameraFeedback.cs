@@ -4,9 +4,6 @@ using UnityEngine;
 [RequireComponent(typeof(Camera))]
 public class CameraFeedback : MonoBehaviour
 {
-    [Header("References")]
-    [SerializeField] private TrickPerformer trickPerformer;
-    [SerializeField] private Transform focusTarget;
 
     [Header("Trick Start Shake")]
     [SerializeField] private float shakeDuration = 0.25f;
@@ -16,7 +13,9 @@ public class CameraFeedback : MonoBehaviour
 
     [Header("Zoom (Trick Start)")]
     [SerializeField] private float zoomDuration = 0.45f;
+    [Tooltip("Cambio temporal del FOV durante el peak. POSITIVO = zoom-out (FOV abre), NEGATIVO = zoom-in (FOV cierra). El signo es contraintuitivo.")]
     [SerializeField] private float zoomDeltaFOV = 6f;
+    [Tooltip("Unidades en world que la cámara se acerca al focusTarget durante el peak. Si focusTarget es null, se ignora y solo cambia FOV. Combinable con zoomDeltaFOV positivo para efecto dolly-zoom.")]
     [SerializeField] private float zoomMoveDistance = 0f;
     [SerializeField] private AnimationCurve zoomShape = AnimationCurve.EaseInOut(0f, 0f, 1f, 0f);
 
@@ -34,6 +33,8 @@ public class CameraFeedback : MonoBehaviour
     private float currentFOVDelta;
     private Coroutine shakeRoutine;
     private Coroutine zoomRoutine;
+    private Transform focusTarget;
+    private TrickPerformer trickPerformer;
 
     private void Awake()
     {
@@ -60,11 +61,24 @@ public class CameraFeedback : MonoBehaviour
         }
     }
 
+    // Shake and zoom coroutines each write into their OWN offset field, never
+    // directly into transform.position. LateUpdate combines both offsets onto
+    // basePosition once per frame so a shake and a dolly-zoom can overlap
+    // without overwriting each other.
     private void LateUpdate()
     {
         transform.position = basePosition + currentShakeOffset + currentZoomOffset;
         cam.fieldOfView = baseFOV + currentFOVDelta;
     }
+
+    public void SetTrickPerformer(TrickPerformer tp)
+    {
+        enabled = false;
+        trickPerformer = tp;
+        enabled = true;
+    }
+
+    public void SetFocusTarget(Transform target) => focusTarget = target;
 
     private void HandleTrickStarted(TrickDefinition trick) => PlayFeedback();
 

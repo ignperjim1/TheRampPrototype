@@ -98,6 +98,23 @@ public static class SfxSynth
         return Make("sfx_fail", d);
     }
 
+    public static AudioClip ScoreClick()
+    {
+        int n = Samples(0.06f);
+        float[] d = new float[n];
+        float phase = 0f;
+        for (int i = 0; i < n; i++)
+        {
+            float t = (float)i / n;
+            float freq = Mathf.Lerp(1400f, 1100f, t);
+            phase = Advance(phase, freq);
+            float tone = Osc(Wave.Sine, phase);
+            float env = AR(t, 0.02f) * ExpDecay(t, 8f);
+            d[i] = tone * env * 0.6f;
+        }
+        return Make("sfx_score", d);
+    }
+
     public static AudioClip RollingLoop()
     {
         int n = Samples(1.0f);
