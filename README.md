@@ -1,79 +1,81 @@
-# The Ramp — Prototipo
+# The Ramp — Prototype
 
-Realizado por Ignacio Pérez-Aguirre Jiménez.
-Duración: 1 semana - aprox. 20-25 horas.
-Prototipo de skate sobre una rampa grande, inspirado en el juego de Steam *The Ramp*. El skate va de un lado a otro de forma automática y salta solo en los bordes; el jugador solo se concentra en hacer swipes en el aire para ejecutar trucos con buen timing.
-Este prototipo ha sido realizado con ayuda de Claude Code como pair programmer.
+Made by Ignacio Pérez-Aguirre Jiménez.
+Time: 1 week, about 20–25 hours. Unity 2022.3.
 
-Requisitos:
-Prueba técnica de 2 semanas. Foco: UX, game feel y "juicy".
-- Sin assets de la Asset Store.
-- Sin plugins externos. Solo packages oficiales de Unity.
-- Único asset visual: pack Kenney *mini-skate*.
-- Control con ratón (simulando dedo).
-- Skate sin personaje, una rampa, movimiento y salto automáticos.
+A skateboarding prototype on a big ramp, inspired by the Steam game *The Ramp*. The board rides back and forth on its own and jumps by itself at the edges, so the player only has to focus on swiping in the air to land tricks with good timing.
+I built this prototype with Claude Code as a pair programmer.
 
-----
-
-## Desglose de actividad
-
-Día	    Actividad (tiempos aproximados)
-24/05	Sesión nocturna corta — setup y planning (1h)
-25/05	1 sesión de tarde — skater + rampas (4h)
-27/05	2 sesiones (tarde + noche) — tricks, cámara, primer UI (5h+3h)
-28/05	1 sesión de tarde — juicy visual + post-process (4h)
-30/05	1 sesión de tarde — audio procedural (2h)
-31/05	Sesión de mañana: polish + README (3h)
+Brief:
+Two-week technical test. Focus: UX, game feel and "juice".
+- No Asset Store assets.
+- No external plugins. Official Unity packages only.
+- Only visual asset: the Kenney *mini-skate* pack.
+- Mouse control (simulating a finger).
+- A board with no rider, one ramp, automatic movement and jumping.
 
 ----
 
-## Cómo jugar
+## Time log
 
-- El skate se mueve solo entre las dos rampas (oscila como un péndulo).
-- Salta de forma automática al llegar al borde de cada rampa.
-- En el aire, arrastra el ratón desde el punto donde lo pulsas hacia una de las 4 direcciones (arriba, abajo, izquierda, derecha) para hacer un truco.
-- El truco solo puntúa si completas la rotación antes de aterrizar. Si caes a medias → wipeout, ragdoll, respawn, y pierdes el score acumulado (la puntuación máxima se mantiene con PlayerPrefs).
-- Puedes encadenar varios trucos en un mismo salto.
+| Day | Activity (approximate times) |
+|-----|------------------------------|
+| 24 May | Short night session: setup and planning (1h) |
+| 25 May | One afternoon session: skater and ramps (4h) |
+| 27 May | Two sessions (afternoon and night): tricks, camera, first UI (5h + 3h) |
+| 28 May | One afternoon session: visual juice and post-processing (4h) |
+| 30 May | One afternoon session: procedural audio (2h) |
+| 31 May | Morning session: polish and README (3h) |
+
+----
+
+## How to play
+
+- The board moves on its own between the two ramps (it swings like a pendulum).
+- It jumps automatically when it reaches the edge of each ramp.
+- In the air, press the mouse and drag from that point in one of 4 directions (up, down, left, right) to do a trick.
+- A trick only scores if its rotation finishes before landing. If you land halfway through a trick → wipeout, ragdoll, respawn, and you lose the score you built up (the best score is kept with PlayerPrefs).
+- You can chain several tricks in a single jump.
 
 ---
 
-## Controles
+## Controls
 
-Botón izquierdo del ratón pulsado + arrastrar en una dirección mientras el skate está en el aire.
+Hold the left mouse button and drag in a direction while the board is in the air.
 
-| Swipe | Truco | Puntos |
+| Swipe | Trick | Points |
 |-------|-------|--------|
-| ↑ Arriba | Impossible | 150 |
-| ↓ Abajo | Kickflip | 100 |
-| ← Izquierda | Pop Shove-it | 80 |
-| → Derecha | Tre Flip | 220 |
+| ↑ Up | Impossible | 150 |
+| ↓ Down | Kickflip | 100 |
+| ← Left | Pop Shove-it | 80 |
+| → Right | Tre Flip | 220 |
 
-El `BEST` score persiste entre runs (`PlayerPrefs`).
-
----
-
-## Decisiones técnicas relevantes
-
-- URP con post-processing (Bloom + Vignette dinámica por estado + Chromatic Aberration y Lens Distortion en aterrizaje limpio).
-- Cinemachine descartado tras probarlo. Nos quedamos con cámara fija propia (`CameraFeedback.cs`) con shake + dolly-zoom hacia el skate al iniciar truco.
-- Físicas tipo péndulo: el skate usa un Rigidbody con velocidad inicial única + un `SpeedMaintainer` que reinyecta velocidad al cruzar el centro del suelo. Sin lógica de movimiento ni de salto scripteada — todo es física.
-- Tricks como rotación cosmética: la coroutine de truco rota un hijo `SkateModel`, nunca el Rigidbody raíz, así no interfiere con el péndulo.
-- Sistema de eventos: `TrickPerformer` expone 4 eventos (`OnTrickStarted`, `OnTrickCompleted`, `OnTrickFailed`, `OnCleanLanding`) consumidos por cámara, audio, HUD, score y feedback visual.
-- Audio 100% procedural: todos los SFX se sintetizan en runtime con `AudioClip.Create` (`SfxSynth.cs`). Sin assets de audio externos.
-- Reflection puntual en `PostProcessFeedback` para subir el clamp de `ChromaticAberration.intensity` por encima de 1 en el aterrizaje tras un truco completado. Documentado en el código.
-- InputBuffering tanto a la hora de saltar de la rampa como a la hora de encadenar trucos.
+The `BEST` score persists between runs (`PlayerPrefs`).
 
 ---
 
-## Estructura del repo
+## Key technical decisions
+
+- URP with post-processing (Bloom, a Vignette that changes with the game state, and Chromatic Aberration and Lens Distortion on a clean landing).
+- Cinemachine was dropped after trying it. I kept my own fixed camera (`CameraFeedback.cs`) with shake and a dolly zoom towards the board when a trick starts.
+- Pendulum physics: the board uses a Rigidbody with a single initial velocity, plus a `SpeedMaintainer` that adds speed back each time it crosses the centre of the floor. There is no scripted movement or jump logic: it is all physics.
+- Tricks are a cosmetic rotation: the trick coroutine rotates a child `SkateModel`, never the root Rigidbody, so it doesn't interfere with the pendulum.
+- Event system: `TrickPerformer` exposes 4 events (`OnTrickStarted`, `OnTrickCompleted`, `OnTrickFailed`, `OnCleanLanding`) that the camera, audio, HUD, score and visual feedback listen to.
+- 100% procedural audio: every sound effect is synthesised at runtime with `AudioClip.Create` (`SfxSynth.cs`). No external audio assets.
+- One use of reflection in `PostProcessFeedback`, to raise the clamp of `ChromaticAberration.intensity` above 1 on the landing after a completed trick. It is documented in the code.
+- Input buffering, both for the jump off the ramp and for chaining tricks.
+
+---
+
+## Repo structure
 
 ```
 Assets/
-├── _Project/             ← todo el código y assets del prototipo
-│   ├── Art/              ← materiales, VFX
-│   ├── Audio/            ← (vacío: el audio es procedural)
-│   ├── Prefabs/          ← Skater, rampa, suelo, UI
-│   ├── Scenes/Main.unity ← escena única
+├── _Project/             ← all the prototype's code and assets
+│   ├── Art/              ← materials, VFX
+│   ├── Audio/            ← (empty: the audio is procedural)
+│   ├── Prefabs/          ← Skater, ramp, floor, UI
+│   ├── Scenes/Main.unity ← single scene
 │   ├── Scripts/
 │   │   ├── Audio/        ← SkaterAudio, SfxSynth
 │   │   ├── Camera/       ← CameraFeedback
@@ -83,14 +85,14 @@ Assets/
 │   │   ├── Tricks/       ← TrickPerformer, SwipeDetector, TrickDefinition (SO), SwipeDirection
 │   │   └── UI/           ← HUD, TrickPopup
 │   ├── Scriptables/      ← TrickDefinition assets (Up/Down/Left/Right)
-│   └── Settings/         ← URP profiles + Physic Material del skate
+│   └── Settings/         ← URP profiles and the board's Physic Material
 ├── ThirdParty/
-│   └── kenney_mini-skate/ ← único asset visual permitido por el brief
-docs/                     ← decisiones de diseño y arquitectura detalladas
+│   └── kenney_mini-skate/ ← the only visual asset the brief allowed
+docs/                     ← detailed design and architecture decisions
 ```
 
 ---
 
-## Documentación técnica detallada
+## Detailed technical docs
 
-Las decisiones de diseño (por qué péndulo y no salto scripteado, por qué cámara fija, por qué audio procedural, por qué eventos en vez de managers...) están explicadas en [docs/](docs/). Cada documento incluye iteraciones descartadas, trade-offs y notas para mantenimiento.
+The design decisions (why a pendulum and not a scripted jump, why a fixed camera, why procedural audio, why events instead of managers...) are explained in [docs/](docs/). Each document covers the iterations I discarded, the trade-offs and notes for maintenance. The docs are written in Spanish.
