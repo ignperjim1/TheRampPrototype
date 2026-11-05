@@ -4,7 +4,6 @@ Made by Ignacio Pérez-Aguirre Jiménez.
 Time: 1 week, about 20–25 hours. Unity 2022.3.
 
 A skateboarding prototype on a big ramp, inspired by the Steam game *The Ramp*. The board rides back and forth on its own and jumps by itself at the edges, so the player only has to focus on swiping in the air to land tricks with good timing.
-I built this prototype with Claude Code as a pair programmer.
 
 Brief:
 Two-week technical test. Focus: UX, game feel and "juice".
